@@ -1,0 +1,13 @@
+model_name,epochs,batch,dataset_name,slaves_num,transfer_quantity_GB,transfer_summary_time_in_memory_sec,accuracy,loss,unfreeze,mean_learning_time_by_epoch_sec,gradient_compression,meta
+18,10,32,uoft-cs/cifar10,5,69.7734,46.88120102882385,0.9131,0.0446468,full,153.5355,none,"attempt 1, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,139.5469,93.76557898521423,0.9058,0.0956925,full,153.4136,none,"attempt 2, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,209.3203,140.87705397605896,0.9059,0.1937128,full,153.9905,none,"attempt 3, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,279.0938,188.32175540924072,0.905,0.0255807,full,153.6384,none,"attempt 4, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,348.8672,235.5002884864807,0.9098,0.0043418,full,154.0494,none,"attempt 5, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,418.6407,282.9894046783447,0.9018,0.0222623,full,153.5976,none,"attempt 6, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,488.4141,329.91145968437195,0.9106,0.0281385,full,153.5328,none,"attempt 7, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,558.1876,376.58037424087524,0.9105,0.0361383,full,153.4321,none,"attempt 8, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,627.961,423.02876710891724,0.907,0.0042208,full,153.2757,none,"attempt 9, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,697.7345,469.7966856956482,0.9051,0.0373645,full,153.6563,none,"attempt 10, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,767.5079,517.0229244232178,0.9063,0.1029985,full,153.5463,none,"attempt 11, baseline without compression, 5 slave"
+18,10,32,uoft-cs/cifar10,5,837.2814,563.783962726593,0.9006,0.0339252,full,153.3982,none,"attempt 12, baseline without compression, 5 slave"

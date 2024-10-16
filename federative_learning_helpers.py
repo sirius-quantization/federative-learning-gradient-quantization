@@ -163,6 +163,19 @@ def run_exp(
                     set_nested_attr(model, param_name, new_param)
         total_time_sending += time() - time_start_sending
 
+        
+    def quantize(gradients_raw, gradient_compression):
+        if gradient_compression == "simple":
+            return [torch.quantize_per_tensor(x.to("cpu"), 0.1, 10, torch.quint8) for x in gradients_raw]
+        else:
+            assert gradient_compression == "none"
+            
+            
+    def dequantize(gradients_raw, gradient_compression):
+        if gradient_compression == "simple":
+            return [x.dequantize() for x in gradients_raw]
+        else:
+            assert gradient_compression == "none"
 
     def move_gradients_from_slaves_to_master():
         global total_bytes, total_time_sending
@@ -173,18 +186,14 @@ def run_exp(
                 continue
             slave_models_params = models[1:]
             gradients_raw = list(map(lambda x: x.grad, slave_models_params))
-            if gradient_compression == "scale":
-                gradients_raw = [x.q_scale() for x in gradients_raw]
-            else:
-                assert gradient_compression == "none"
             if None in gradients_raw:
                 return
+            # gradients_raw = quantize(gradients_raw, gradient_compression)
             total_bytes += torch.stack(gradients_raw).nelement() * torch.stack(gradients_raw).element_size()
-            if gradient_compression == "scale":
-                gradients_raw = [x.dequantize() for x in gradients_raw]
-            else:
-                assert gradient_compression == "none"
+            # gradients_raw = dequantize(gradients_raw, gradient_compression)
             gradient = torch.mean(torch.stack(gradients_raw), dim=0)
+            print(gradient.dtype, gradient.shape)
+            print(gradient)
             master_model_params.grad = gradient
         total_time_sending += time() - time_start_sending
 

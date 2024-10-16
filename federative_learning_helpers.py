@@ -73,7 +73,7 @@ class Row:
     loss: float
     unfreeze: Literal[Union["full", "last_layer"]]
     mean_learning_time_by_epoch_sec: float
-    gradient_compression: Literal[Union["none", "scale"]]
+    gradient_compression: Literal[Union["none", "simple"]]
     meta: str
     
     
@@ -169,6 +169,7 @@ def run_exp(
             return [torch.quantize_per_tensor(x.to("cpu"), 0.1, 10, torch.quint8) for x in gradients_raw]
         else:
             assert gradient_compression == "none"
+            return gradients_raw
             
             
     def dequantize(gradients_raw, gradient_compression):
@@ -176,10 +177,12 @@ def run_exp(
             return [x.dequantize() for x in gradients_raw]
         else:
             assert gradient_compression == "none"
+            return gradients_raw
 
     def move_gradients_from_slaves_to_master():
         global total_bytes, total_time_sending
         time_start_sending = time()
+        quantize_time_total = 0
         for models in zip(master_model.parameters(), *list(map(lambda x: x.parameters(), slave_models))):
             master_model_params = models[0]
             if not master_model_params.requires_grad:
@@ -188,14 +191,14 @@ def run_exp(
             gradients_raw = list(map(lambda x: x.grad, slave_models_params))
             if None in gradients_raw:
                 return
-            # gradients_raw = quantize(gradients_raw, gradient_compression)
-            total_bytes += torch.stack(gradients_raw).nelement() * torch.stack(gradients_raw).element_size()
-            # gradients_raw = dequantize(gradients_raw, gradient_compression)
-            gradient = torch.mean(torch.stack(gradients_raw), dim=0)
-            print(gradient.dtype, gradient.shape)
-            print(gradient)
-            master_model_params.grad = gradient
-        total_time_sending += time() - time_start_sending
+            quantize_time_started = time()
+            gradients_raw = torch.stack(quantize(gradients_raw, gradient_compression))
+            total_bytes += gradients_raw.nelement() * gradients_raw.element_size()
+            gradient = torch.mean(gradients_raw, dim=0)
+            master_model_params.grad = torch.stack(dequantize(gradient, gradient_compression)).to(device)
+            quantize_time_total += time() - quantize_time_started
+
+        total_time_sending += time() - time_start_sending - quantize_time_total
 
     start_time = time()
     for epoch in trange(EPOCH_COUNT, desc="iterating through epochs"):
